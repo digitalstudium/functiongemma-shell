@@ -23,7 +23,7 @@ A conversational AI assistant powered by Ollama with function calling capabiliti
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/digitalstudium/functiongemma-shell
 cd functiongemma-shell
 ```
 
@@ -38,9 +38,10 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Pull the FunctionGemma model (if not already installed):
+4. Pull the FunctionGemma model (if not already installed) and run ollama:
 ```bash
 ollama pull functiongemma
+ollama serve
 ```
 
 ## Usage
