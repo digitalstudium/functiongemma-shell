@@ -1,136 +1,95 @@
-# FunctionGemma Shell
+# FunctionGemma Shell (Experimental)
 
-A conversational AI assistant powered by Ollama with function calling capabilities for system operations.
+A small **experimental terminal chat tool** built to demonstrate how **FunctionGemma** (via **Ollama tool/function calling**) can be used from the command line to run simple “tools” (system/utility functions) and render results nicely in the terminal.
+
+This project is **for demo / exploration purposes only**—it is not production-ready and it intentionally keeps the conversation **stateless** (each request is sent without previous context).
+
+## What this is (and what it isn’t)
+
+- This **is** a minimal CLI wrapper around `ollama.chat(...)` that exposes a few Python functions as tools.
+- This **is** meant to help you quickly test how a tool-calling model behaves in a terminal workflow.
+- This **is not** a secure shell, remote admin tool, or a production chatbot.
+- This **does not** maintain chat context across turns (by design).
 
 ## Features
 
-- 🤖 Interactive chat interface with function calling support
-- 🔧 Built-in tools for system operations:
-  - **File Search**: Find the largest file in a directory
-  - **System Info**: Get OS, CPU, memory, and disk information
-  - **Website Check**: Check website availability and response time
-- 💬 Command history with persistent storage
-- 🎨 Rich terminal UI with syntax highlighting
-- 🔄 Model switching on the fly
+- Interactive terminal UI (prompt, history, markdown rendering)
+- Ollama chat integration with **tools/function calling**
+- Built-in demo tools:
+  - `find_largest_file(directory)` — find the largest file under a directory (uses `find/du/sort`)
+  - `get_system_info()` — basic OS/CPU/memory/disk info
+  - `check_website(url)` — HTTP status + latency check
 
 ## Requirements
 
 - Python 3.8+
-- [Ollama](https://ollama.ai/) installed and running
-- FunctionGemma model (or any other model with function calling support)
+- [Ollama](https://ollama.com/) installed and running
+- A tool-calling capable model (default: `functiongemma`)
 
-## Installation
+## Setup
 
-1. Clone the repository:
 ```bash
-git clone https://github.com/digitalstudium/functiongemma-shell
+git clone <your-repo-url>
 cd functiongemma-shell
-```
 
-2. Create and activate virtual environment:
-```bash
 python3 -m venv venv
 source venv/bin/activate
-```
 
-3. Install dependencies:
-```bash
 pip install -r requirements.txt
 ```
 
-4. Pull the FunctionGemma model (if not already installed) and run ollama:
+Pull the model:
+
 ```bash
 ollama pull functiongemma
-ollama serve
 ```
 
-## Usage
+## Run
 
-Run the chat interface:
 ```bash
 python chat.py
 ```
 
-### Available Commands
+You should see an interactive prompt:
 
-- `/help` - Show help information
-- `/model <name>` - Switch to a different model
-- `/exit` - Exit the application
+- `You:` — your input
+- `Assistant:` — formatted tool output (Markdown rendered via `rich`)
 
-You can also type `выход`, `quit`, or `exit` to quit.
+## Commands
 
-### Example Interactions
+- `/help` — show help
+- `/model <name>` — switch Ollama model at runtime
+- `/exit` — quit
 
-**Check system information:**
-```
-You: system information
-```
+## Example prompts to trigger tools
 
-**Find largest file:**
-```
-You: find the largest file in /home
-```
+Try natural language—FunctionGemma decides whether to call a tool.
 
-**Check website:**
-```
-You: check if google.com is available
-```
+- Largest file:
+  - “Find the largest file in /home”
+  - “Largest file in ./”
+- System info:
+  - “Show system info”
+  - “CPU cores and memory”
+- Website check:
+  - “Check google.com”
+  - “Is https://github.com reachable?”
 
-## Available Tools
+## Notes / Limitations (Important)
 
-### 1. `find_largest_file`
-Finds the largest file in a specified directory using bash commands.
+- **Stateless by design:** the script does not feed previous messages back to the model.
+- **Local-only demo:** tools run on your machine with your permissions.
+- **Shell command usage:** `find_largest_file` uses shell commands (`find`, `du`, `sort`). This is a demo and not hardened against malicious input.
+- **Tool coverage is minimal:** only three tools are included to demonstrate the concept.
 
-**Arguments:**
-- `directory` (optional): Path to search (default: current directory)
-
-### 2. `get_system_info`
-Retrieves basic system information including OS, hostname, CPU cores, memory, and disk usage.
-
-**No arguments required**
-
-### 3. `check_website`
-Checks website availability and measures response time.
-
-**Arguments:**
-- `url`: Website URL (protocol optional, e.g., "google.com" or "https://github.com")
-
-## Project Structure
+## Project structure
 
 ```
-functiongemma-shell/
-├── chat.py              # Main application file
-├── requirements.txt     # Python dependencies
-└── venv/               # Virtual environment (generated)
+.
+├── chat.py
+└── requirements.txt
 ```
 
-## Dependencies
+## Disclaimer
 
-- `ollama` - Ollama Python client
-- `prompt-toolkit` - Interactive command-line interface
-- `rich` - Terminal formatting and markdown rendering
-
-## Configuration
-
-The default model is set to `functiongemma`. You can change it by:
-1. Editing the `model` variable in `chat.py`
-2. Using the `/model <name>` command during runtime
-
-## Chat History
-
-Command history is automatically saved to `~/.ollama_chat_history` for persistence across sessions.
-
-## Notes
-
-- The application runs each query independently (stateless) - previous context is not preserved between queries
-- Tool execution timeout is set to 30 seconds for file operations
-- Website checks have a 5-second timeout
-- All tool responses are formatted with rich markdown output
-
-## License
-
-[Your License Here]
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+This is an **experimental demo tool** showing how FunctionGemma-style tool calling can be used from a terminal. Use at your own risk. Do not run it on machines where executing local commands could be unsafe.
