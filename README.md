@@ -29,7 +29,7 @@ This project is **for demo / exploration purposes only**—it is not production-
 ## Setup
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/digitalstudium/functiongemma-shell
 cd functiongemma-shell
 
 python3 -m venv venv
