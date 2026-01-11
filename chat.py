@@ -16,6 +16,7 @@ from prompt_toolkit.history import FileHistory
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
+from transformers.utils import get_json_schema
 
 console = Console()
 # model = 'qwen3:1.7b'
@@ -26,8 +27,11 @@ def check_website(url: str) -> str:
     """
     Check website availability (HTTP status).
 
-    Arguments:
-        url: Website address (e.g., "google.com" or "https://github.com")
+    Args:
+        url: Website address (e.g., "google.com" or "https://github.com").
+
+    Returns:
+        A JSON string containing status code and latency information.
     """
     # Add protocol if missing
     if not url.startswith(("http://", "https://")):
@@ -72,11 +76,11 @@ def find_largest_file(directory: str = ".") -> str:
     """
     Find the largest file in a directory using bash commands.
 
-    Arguments:
-        directory: Path to directory for search (default: current directory)
+    Args:
+        directory: Directory path to search in. Defaults to current directory.
 
     Returns:
-        JSON string with information about the largest file
+        A JSON string with information about the largest file found.
     """
     try:
         directory = os.path.expandvars(directory)
@@ -218,9 +222,6 @@ def get_system_info() -> str:
         return json.dumps({"status": "error", "message": str(e)}, ensure_ascii=False)
 
 
-TOOLS = [find_largest_file, get_system_info, check_website]
-
-
 # 🎯 RESPONSE TEMPLATES
 def format_tool_response(tool_name: str, arguments: dict, result_json: str) -> str:
     """
@@ -338,6 +339,12 @@ def main():
         )
     )
 
+    TOOLS = [
+        get_json_schema(find_largest_file),
+        get_json_schema(get_system_info),
+        get_json_schema(check_website),
+    ]
+
     while True:
         try:
             user_input = session.prompt("You: ").strip()
@@ -374,12 +381,27 @@ def main():
         # Log question (locally)
         log_messages.append({"role": "user", "content": user_input})
 
+        DEFAULT_SYSTEM_MSG = (
+            "You are a model that can do function calling with the following functions."
+        )
+
         request_messages = [
+            {"role": "developer", "content": DEFAULT_SYSTEM_MSG},
             {"role": "user", "content": user_input},
         ]
 
         try:
-            response = chat(model, messages=request_messages, tools=TOOLS)
+            response = chat(
+                model,
+                messages=request_messages,
+                tools=TOOLS,
+                options={
+                    "top_k": 64,
+                    "top_p": 0.95,
+                    "temperature": 0.3,
+                    "num_ctx": 32768,  # контекст
+                },
+            )
         except Exception as e:
             console.print(f"[red]Error: {e}[/red]")
             # rollback user message logging
